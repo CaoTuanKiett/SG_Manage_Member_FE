@@ -43,6 +43,19 @@
         }
       }
 
+      const toggle = () => {
+        const titleSignIn = document.querySelector('.title-SignIn');
+        const titleSignUn = document.querySelector('.title-SignUp');
+        const btnSignIn = document.querySelector('.btn-SignIn');
+        const btnSignUn = document.querySelector('.btn-SignUp');
+
+
+        titleSignIn.classList.toggle('hidden');
+        titleSignUn.classList.toggle('hidden');
+        btnSignIn.classList.toggle('hidden');
+        btnSignUn.classList.toggle('hidden');
+      }
+
       const login = () => {
         axios
           .post("http://localhost:3000/api/v1/auth/login", {
@@ -74,24 +87,14 @@
           })
           .then((response) => {
             onNoti(response.data.message, "Register Success"  )
+            toggle();
           })
           .catch((error) => {
             onNoti( error.response.data.message  , error.response.data.error.message)
           });
       };
 
-      const toggle = () => {
-        const titleSignIn = document.querySelector('.title-SignIn');
-        const titleSignUn = document.querySelector('.title-SignUp');
-        const btnSignIn = document.querySelector('.btn-SignIn');
-        const btnSignUn = document.querySelector('.btn-SignUp');
-
-
-        titleSignIn.classList.toggle('hidden');
-        titleSignUn.classList.toggle('hidden');
-        btnSignIn.classList.toggle('hidden');
-        btnSignUn.classList.toggle('hidden');
-      }
+      
 
       
 
