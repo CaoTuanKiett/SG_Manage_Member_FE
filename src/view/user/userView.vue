@@ -3,6 +3,7 @@ import axios from "axios";
 import { computed, defineComponent, onMounted, ref } from "vue";
 import Cookies from 'js-cookie';
 import {  useRouter } from 'vue-router';
+import { notify } from "@kyvg/vue3-notification";
 
 
 
@@ -24,6 +25,11 @@ export default defineComponent({
 
     const logout = () => {
       Cookies.remove('auth_token');
+      notify({
+        title: "Logout Success",
+        text: "You are logged out",
+        type: "success",
+      });
     }
 
 
