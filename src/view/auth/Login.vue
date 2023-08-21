@@ -64,7 +64,6 @@
           })
           .then((response) => {
             const token = response.data.token.token;
-            
             if(token){
               console.log(token);
               Cookies.set("auth_token", token, { expires: 1 });
@@ -94,9 +93,6 @@
           });
       };
 
-      
-
-      
 
       return {
         username,
@@ -120,7 +116,7 @@
     </div>
     
     <form @submit.prevent="" >
-      <div class="input border-2 p-2 rounded flex mb-4">
+    <div class="input border-2 p-2 rounded flex mb-4">
       <i class="fa-regular fa-envelope mr-3 text-base text-slate-500"></i>
       <input class="focus:outline-none placeholder:text-slate-500 w-full" v-model="username" name="username" type="text" placeholder="Username" />
     </div>

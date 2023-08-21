@@ -30,6 +30,8 @@ export default defineComponent({
         text: "You are logged out",
         type: "success",
       });
+
+      router.push({ name: 'Home' });
     }
 
 
@@ -46,6 +48,7 @@ export default defineComponent({
 
 
     const closeAllPopup = () => {
+      console.log("closeAllPopup");
       var popups = document.querySelectorAll('.boxAction');
       let overlay = document.querySelector(".overlay")
       overlay.style.display = "none"
@@ -54,12 +57,12 @@ export default defineComponent({
 
     const autoClosePopup = (e) => {
       if (e.target.classList.contains('.boxAction')) return;
-      this.closeAllPopup()
+      closeAllPopup()
       console.log("autoClosePopup");
     }
 
     const showPopup = (id) => {
-      this.closeAllPopup()
+      closeAllPopup()
       var popup = document.querySelector("#action-" + id)
       let overlay = document.querySelector(".overlay")
       if (popup.dataset.display == "none") {
@@ -74,13 +77,26 @@ export default defineComponent({
     }
 
     const onDelete = (id) => {
-      this.filterUser(id);
-      this.closeAllPopup();
+      closeAllPopup();
+      axios
+        .delete("http://localhost:3000/api/v1/users/" + id)
+        .then((response) => {
+          notify({
+            title: "Delete Success",
+            text: "User deleted",
+            type: "success",
+          });
+          console.log(response.data);
+          fetchData();
+        })
+        .catch((error) => {
+          notify({
+            title: "Delete Failed",
+            text: error.response.data.message,
+            type: "error",
+          });
+        });
     }
-
-    const filterUser = (id) => {
-      this.userData = this.userData.filter(u => u.id !== id)
-    };
 
     const fetchData  = async () => {
       try {
@@ -107,17 +123,27 @@ export default defineComponent({
       fetchData();
     });
 
+    const editUser = (id) => {
+      closeAllPopup()
+      router.push({ name: 'UserDetail', params: { id: id } });
+    }
+
+    const addUser = () => {
+      router.push({ name: 'UserDetail' });
+    }
+
     return {
       tableColumns,
       closeAllPopup,
       autoClosePopup,
       showPopup,  
       onDelete,
-      filterUser,
       searchKeyword,
       filteredUsers,
       logout,
       router,
+      editUser,
+      addUser,
     };
   },
 
@@ -129,7 +155,7 @@ export default defineComponent({
  <div class="box-border p-0 m-0 flex items-center justify-center w-full">
   <div  class="w-3/5 " >
 
-<div class="container-header pt-10 ">
+<div class="container-header pt-10 flex justify-between ">
 
   <label class="relative block">
     <span class="sr-only">Search</span>
@@ -138,6 +164,12 @@ export default defineComponent({
     </span>
     <input class="placeholder:italic placeholder:text-slate-400 block bg-white w-full border border-slate-300 rounded-md py-2 pl-9 pr-3 shadow-sm focus:outline-none focus:border-sky-500 focus:ring-sky-500 focus:ring-1 sm:text-sm" placeholder="Search for anything..." type="text" name="search" v-model="searchKeyword"/>
   </label>
+
+  <button type="button" class="flex justify-end px-4 py-2 text-sm font-medium text-white rounded-md bg-gray-500 hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+      @click="addUser()"
+      >
+      Thêm Mới
+    </button>
   
 </div>
 
@@ -166,7 +198,7 @@ export default defineComponent({
         <div :id="'action-' + user.id" data-display="none" class="boxAction popup hidden absolute right-0 w-32 mt-1 origin-top-right bg-white divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50 focus:outline-none">
             <div class="px-1 py-1 popup">
                 <button class="popup hover:bg-gray-400 hover:text-white text-gray-900 group flex rounded-md items-center w-full px-2 py-2 text-sm" 
-                @click="closeAllPopup()">
+                @click="editUser(user.id)">
                     <svg xmlns="http://www.w3.org/2000/svg" class="popup w-5 h-5 mr-2 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                     Edit 
                 </button>
@@ -187,12 +219,16 @@ export default defineComponent({
   <div @click="closeAllPopup()" class=" hidden overlay  absolute top-0 right-0 left-0 bottom-0"></div>
 
 </div>
-<button type="button" class="flex justify-end px-4 py-2 text-sm font-medium text-white rounded-md bg-gray-500 hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
+
+  <div class="flex justify-between">
+    <button type="button" class="flex justify-end px-4 py-2 text-sm font-medium text-white rounded-md bg-gray-500 hover:bg-gray-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-opacity-75"
       @click="logout"
       >
-      <router-link to="/" class="text-white">ĐĂNG XUẤT</router-link>
-      
+      ĐĂNG XUẤT
     </button>
+
+   
+  </div>
 </div>
   
  </div>
