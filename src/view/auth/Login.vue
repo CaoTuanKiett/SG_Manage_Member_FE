@@ -1,115 +1,117 @@
 
 <script>
-  import { ref } from "vue";
+  import { ref, unref } from "vue";
   import axios from "axios";
   import { notify } from "@kyvg/vue3-notification";
   import Cookies from 'js-cookie';
   import {  useRouter } from 'vue-router';
 
+  import AuthLayout from "../../layouts/AuthLayout.vue";
+  import { useAuthStore } from "../../store/authStore.js"
 
   export default {
     name: "LoginView",
     setup() {
-      const username = ref("");
-      const password = ref("");
-
-      const router = useRouter();
-
-      const onNoti = (message, data) => {
-        if(message == "Login Success"){  
-          notify({
-            title: "Login Success",
-            text: "helloo " + data ,
-            type: "success",
-          });
-        }else if(message == "Login Failed"){
-          notify({
-            title: "Login Failed",
-            text: data,
-            type: "error",
-          });
-        }else if(message == "Register Success"){
-          notify({
-            title: "Register Success",
-            text: "You are registered",
-            type: "success",
-          });
-        }else if(message == "Register Failed"){
-          notify({
-            title: "Register Failed",
-            text: "Username or password is incorrect",
-            type: "error",
-          });
-        }
-      }
-
-      const toggle = () => {
-        const titleSignIn = document.querySelector('.title-SignIn');
-        const titleSignUn = document.querySelector('.title-SignUp');
-        const btnSignIn = document.querySelector('.btn-SignIn');
-        const btnSignUn = document.querySelector('.btn-SignUp');
-
-
-        titleSignIn.classList.toggle('hidden');
-        titleSignUn.classList.toggle('hidden');
-        btnSignIn.classList.toggle('hidden');
-        btnSignUn.classList.toggle('hidden');
-      }
-
-      const login = () => {
-        axios
-          .post("http://localhost:3000/api/v1/auth/login", {
-            username: username.value,
-            password: password.value,
-          })
-          .then((response) => {
-            const token = response.data.token.token;
-            if(token){
-              console.log(token);
-              Cookies.set("auth_token", token, { expires: 1 });
-              onNoti(response.data.message, response.data.token.username);
-              router.push({ name: 'UserView' });
+        const username = ref("");
+        const password = ref("");
+        const router = useRouter();
+        const authStore = useAuthStore();
+        const onNoti = (message, data) => {
+            if (message == "Login Success") {
+                notify({
+                    title: "Login Success",
+                    text: "helloo " + data,
+                    type: "success",
+                });
             }
-          })
-          .catch((error) => {
-            if(error.response){
-              onNoti( error.response.data.message  , error.response.data.error.message)
+            else if (message == "Login Failed") {
+                notify({
+                    title: "Login Failed",
+                    text: data,
+                    type: "error",
+                });
             }
-          });
-      };
-
-      const signUp = () => {
-        axios
-          .post("http://localhost:3000/api/v1/auth/register", {
-            username: username.value,
-            password: password.value,
-          })
-          .then((response) => {
-            onNoti(response.data.message, "Register Success"  )
-            toggle();
-          })
-          .catch((error) => {
-            onNoti( error.response.data.message  , error.response.data.error.message)
-          });
-      };
-
-
-      return {
-        username,
-        password,
-        login,
-        signUp,
-        toggle,
-        onNoti,
-        router,
-      };
+            else if (message == "Register Success") {
+                notify({
+                    title: "Register Success",
+                    text: "You are registered",
+                    type: "success",
+                });
+            }
+            else if (message == "Register Failed") {
+                notify({
+                    title: "Register Failed",
+                    text: "Username or password is incorrect",
+                    type: "error",
+                });
+            }
+        };
+        const toggle = () => {
+            const titleSignIn = document.querySelector('.title-SignIn');
+            const titleSignUn = document.querySelector('.title-SignUp');
+            const btnSignIn = document.querySelector('.btn-SignIn');
+            const btnSignUn = document.querySelector('.btn-SignUp');
+            titleSignIn.classList.toggle('hidden');
+            titleSignUn.classList.toggle('hidden');
+            btnSignIn.classList.toggle('hidden');
+            btnSignUn.classList.toggle('hidden');
+        };
+        const login = () => {
+            axios
+                .post("http://localhost:3000/api/v1/auth/login", {
+                username: username.value,
+                password: password.value,
+            })
+                .then((response) => {
+                  console.log(response.data.token);
+                const token = response.data.token.token;
+                if (token) {
+                    console.log(token);
+                    authStore.setToken(token);
+                    Cookies.set("auth_token", token, { expires: 1 });
+                    onNoti(response.data.message, response.data.token.username);
+                    router.push({ name: 'AdminView' });
+                }
+            })
+                .catch((error) => {
+                if (error.response) {
+                    onNoti(error.response.data.message, error.response.data.error.message);
+                }
+            });
+        };
+        
+        
+        const signUp = () => {
+            axios
+                .post("http://localhost:3000/api/v1/auth/register", {
+                username: username.value,
+                password: password.value,
+            })
+                .then((response) => {
+                onNoti(response.data.message, "Register Success");
+                toggle();
+            })
+                .catch((error) => {
+                onNoti(error.response.data.message, error.response.data.error.message);
+            });
+        };
+        return {
+            username,
+            password,
+            login,
+            signUp,
+            toggle,
+            onNoti,
+            router,
+        };
     },
-    
-  };
+    components: { AuthLayout }
+};
 </script>
 
 <template>
-  <div class=" w-1/3 shadow-2xl border-2 rounded-md py-8 px-10">
+  <AuthLayout> 
+    <div class=" w-1/3 shadow-2xl border-2 rounded-md py-8 px-10">
     <div class="flex justify-center">
       <h1 class="title-SignIn  text-black text-xl font-bold mb-6">LOG IN</h1>
       <h1 class="title-SignUp hidden text-black text-xl font-bold mb-6">REGISTER</h1>
@@ -154,6 +156,8 @@
     </div>
     </form>
   </div>
+  </AuthLayout>
+  
 </template>
 <style scoped>
   
